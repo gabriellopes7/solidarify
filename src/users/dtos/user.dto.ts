@@ -1,4 +1,5 @@
 import { IsDateString, IsEmail, IsNotEmpty } from 'class-validator';
+import { UserType } from 'src/entities/userType.enum';
 
 export class CreateUserDto {
   @IsEmail()
@@ -23,4 +24,7 @@ export class CreateUserDto {
   contact?: number;
 
   isPrivate: boolean;
+
+  @IsNotEmpty()
+  userType: UserType;
 }

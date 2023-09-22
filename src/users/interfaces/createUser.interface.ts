@@ -8,4 +8,5 @@ interface ICreateUserInterface {
   birthDate: Date;
   contact?: number;
   isPrivate: boolean;
+  userType: number;
 }

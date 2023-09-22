@@ -1,5 +1,6 @@
 import { Column, Entity, ObjectId, ObjectIdColumn, OneToOne } from 'typeorm';
 import { Photo } from './photo.entity';
+import { UserType } from './userType.enum';
 
 @Entity()
 export class User {
@@ -23,6 +24,9 @@ export class User {
 
   @Column()
   birthDate: Date;
+
+  @Column('int')
+  userType: UserType;
 
   @Column()
   contact?: number;
