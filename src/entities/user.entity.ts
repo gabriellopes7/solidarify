@@ -30,6 +30,6 @@ export class User {
   @Column()
   isPrivate: boolean;
 
-  @OneToOne((type) => Photo)
+  @OneToOne(() => Photo)
   photo?: Photo;
 }

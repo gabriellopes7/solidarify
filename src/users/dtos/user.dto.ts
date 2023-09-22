@@ -1,4 +1,3 @@
-import { Type } from 'class-transformer';
 import { IsDateString, IsEmail, IsNotEmpty } from 'class-validator';
 
 export class CreateUserDto {

@@ -3,7 +3,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { User } from './entities/user.entity';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Photo } from './entities/photo.entity';
@@ -15,7 +14,7 @@ import { Photo } from './entities/photo.entity';
     TypeOrmModule.forRoot({
       type: 'mongodb',
       url: process.env.MONGO_URI,
-      database: 'solidarifyDb',
+      database: process.env.MONGO_DATABASE,
       entities: [User, Photo],
       synchronize: true,
       autoLoadEntities: true,
