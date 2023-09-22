@@ -1,6 +1,13 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -10,11 +17,29 @@ export class AuthService {
   ) {}
 
   async signIn(signInDto: ISignInInterface): Promise<any> {
-    const user = await this.usersService.findByEmail(signInDto.email);
-    if (user?.password !== signInDto.password) {
-      throw new UnauthorizedException();
+    const user = await this.usersService
+      .findByEmail(signInDto.email)
+      .catch(() => undefined);
+    if (!signInDto.password) {
+      throw new BadRequestException('Something bad happened', {
+        cause: new Error(),
+        description: 'Password is required',
+      });
     }
-    const payload = { sub: user.id, email: user.email, type: user.userType };
+    if (!user) throw new BadRequestException('User does not exist');
+
+    const isMatch = bcrypt.compare(signInDto.password, user.password);
+
+    if (!isMatch) {
+      throw new HttpException(
+        {
+          status: HttpStatus.FORBIDDEN,
+          error: 'Incorrect Password',
+        },
+        HttpStatus.FORBIDDEN,
+      );
+    }
+    const payload = { sub: user.id, email: user.email };
     return {
       access_token: await this.jwtService.signAsync(payload, {
         secret: process.env.JWT_SECRET,

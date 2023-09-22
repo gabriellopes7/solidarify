@@ -11,7 +11,6 @@ export class UsersService {
 
   async create(createUserDto: ICreateUserInterface): Promise<User> {
     createUserDto.isActive = true;
-    createUserDto.isPrivate = true;
     return this.usersRepository.save(createUserDto);
   }
 
