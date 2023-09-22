@@ -19,8 +19,8 @@ export class UsersService {
     throw NotImplementedException;
   }
 
-  async findOne(): Promise<User | null> {
-    throw NotImplementedException;
+  async findByEmail(email: string): Promise<User | null> {
+    return this.usersRepository.findOneBy({ email });
   }
 
   async remove(id: number): Promise<void> {
