@@ -17,4 +17,7 @@ export class User {
 
   @OneToOne(() => Photo)
   photo?: Photo;
+
+  @Column()
+  refreshToken?: string;
 }

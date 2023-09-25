@@ -10,7 +10,7 @@ import { AuthService } from './auth.service';
 import { SignInDto } from './dtos/signIn.dto';
 import { CreateUserDto } from 'src/users/dtos/user.dto';
 import { UsersService } from 'src/users/users.service';
-import * as bcrypt from 'bcrypt';
+import { SignUpDto } from './dtos/signUp.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -26,19 +26,17 @@ export class AuthController {
   }
 
   @Post('sign-up')
-  async signUp(@Body() createUserDto: CreateUserDto) {
+  async signUp(
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<SignUpDto | undefined> {
     const user = await this.userService.findByEmail(createUserDto.email);
     if (user) {
       throw new ConflictException('This email is already being used.');
     }
 
-    const saltOrRounds = Number(process.env.HASH_ROUNDS);
-    const hashPassword = await bcrypt.hash(
-      createUserDto.password,
-      saltOrRounds,
-    );
-    createUserDto.password = hashPassword;
     const newUser = await this.userService.create(createUserDto);
-    return newUser;
+    const tokens = await this.authService.getTokens(newUser.id, newUser.email);
+    await this.authService.updateRefreshToken(newUser.id, tokens.refreshToken);
+    return tokens;
   }
 }

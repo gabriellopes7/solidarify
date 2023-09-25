@@ -3,11 +3,11 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
+import { ObjectId } from 'typeorm';
 
 @Injectable()
 export class AuthService {
@@ -39,12 +39,46 @@ export class AuthService {
         HttpStatus.FORBIDDEN,
       );
     }
-    const payload = { sub: user.id, email: user.email };
+    const tokens = await this.getTokens(user.id, user.email);
+    user.refreshToken = tokens.refreshToken;
+    await this.updateRefreshToken(user.id, tokens.refreshToken);
+    return tokens;
+  }
+
+  async getTokens(id: ObjectId, email: string) {
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(
+        {
+          sub: id,
+          email,
+        },
+        {
+          secret: process.env.JWT_ACCESS_TOKEN_SECRET,
+          expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRES,
+        },
+      ),
+      this.jwtService.signAsync(
+        {
+          sub: id,
+          email,
+        },
+        {
+          secret: process.env.JWT_REFRESH_TOKEN_SECRET,
+          expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES,
+        },
+      ),
+    ]);
     return {
-      access_token: await this.jwtService.signAsync(payload, {
-        secret: process.env.JWT_SECRET,
-        expiresIn: process.env.JWT_EXPIRES,
-      }),
+      accessToken,
+      refreshToken,
     };
+  }
+
+  async updateRefreshToken(userId: ObjectId, refreshToken: string) {
+    const saltOrRounds = Number(process.env.HASH_ROUNDS);
+    const hashedRefreshToken = await bcrypt.hash(refreshToken, saltOrRounds);
+    await this.usersService.update(userId, {
+      refreshToken: hashedRefreshToken,
+    });
   }
 }
