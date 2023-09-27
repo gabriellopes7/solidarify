@@ -1,23 +1,29 @@
 import { Column, Entity, ObjectId, ObjectIdColumn, OneToOne } from 'typeorm';
 import { Photo } from './photo.entity';
+import mongoose, { HydratedDocument } from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Individual } from './individual.entity';
 
-@Entity()
+export type UserDocument = HydratedDocument<User>;
+
+@Schema()
 export class User {
-  @ObjectIdColumn()
-  id: ObjectId;
-
-  @Column('email')
+  @Prop({ type: String, required: true })
   email: string;
 
-  @Column()
+  @Prop({ type: String, required: true })
   password: string;
 
-  @Column({ type: 'boolean', nullable: false, select: false, default: true })
+  @Prop(Boolean)
   isActive: boolean;
 
-  @OneToOne(() => Photo)
-  photo?: Photo;
+  // // @OneToOne(() => Photo)
+  // photo?: Photo;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Individual' })
+  Individual: Individual;
 
-  @Column()
+  @Prop(String)
   refreshToken?: string;
 }
+
+export const UserSchema = SchemaFactory.createForClass(User);

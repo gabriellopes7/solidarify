@@ -1,17 +1,18 @@
-import { Injectable, NotImplementedException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/entities/user.entity';
-import { ObjectId, Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { User, UserDocument } from 'src/entities/user.entity';
+import { CreateUserDto } from './dtos/user.dto';
+import { IUpdateUser } from './interfaces/updateUser.interface';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectRepository(User) private readonly usersRepository: Repository<User>,
-  ) {}
+  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
-  async create(createUserDto: ICreateUser): Promise<User> {
-    // const saltOrRounds = Number(process.env.HASH_ROUNDS);
+  async create(
+    createUserDto: CreateUserDto,
+  ): Promise<UserDocument | undefined> {
     const saltOrRounds = Number(process.env.HASH_ROUNDS);
     const hashPassword = await bcrypt.hash(
       createUserDto.password,
@@ -19,27 +20,30 @@ export class UsersService {
     );
     createUserDto.isActive = true;
     createUserDto.password = hashPassword;
-    return await this.usersRepository.save(createUserDto);
-  }
-
-  async update(userId: ObjectId, updateUserDto: IUpdateUser): Promise<any> {
-    return await this.usersRepository.update(
-      { id: userId },
-      {
-        refreshToken: updateUserDto.refreshToken,
-      },
-    );
+    const createdUser = await this.userModel.create(createUserDto);
+    // await createdUser.save();
+    return createdUser;
   }
 
   async findAll(): Promise<User[]> {
-    throw NotImplementedException;
+    return await this.userModel.find().exec();
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    return await this.usersRepository.findOneBy({ email });
+  async findByEmail(email: string): Promise<UserDocument | undefined> {
+    const user = await this.userModel.findOne({ email: email }).exec();
+    return user;
   }
 
-  async remove(id: string): Promise<void> {
-    await this.usersRepository.delete(id);
+  async findById(id: string) {
+    return await this.userModel.findById(id).exec();
+  }
+
+  async updateById(id: string, updateUserInterface: IUpdateUser) {
+    return await this.userModel
+      .findByIdAndUpdate(id, updateUserInterface, {
+        new: true,
+        runValidators: true,
+      })
+      .exec();
   }
 }

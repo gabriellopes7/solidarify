@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   ConflictException,
   Controller,
@@ -9,8 +10,8 @@ import {
 import { AuthService } from './auth.service';
 import { SignInDto } from './dtos/signIn.dto';
 import { CreateUserDto } from 'src/users/dtos/user.dto';
-import { UsersService } from 'src/users/users.service';
 import { SignUpDto } from './dtos/signUp.dto';
+import { UsersService } from 'src/users/users.service';
 
 @Controller('auth')
 export class AuthController {
@@ -22,7 +23,16 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async signIn(@Body() signInDto: SignInDto) {
-    return this.authService.signIn(signInDto);
+    if (!signInDto.password) {
+      throw new BadRequestException('Something bad happened', {
+        cause: new Error(),
+        description: 'Password is required',
+      });
+    }
+    const user = await this.userService.findByEmail(signInDto.email);
+    if (!user) throw new BadRequestException('User does not exist');
+
+    return this.authService.signIn(signInDto, user);
   }
 
   @Post('sign-up')
@@ -30,6 +40,7 @@ export class AuthController {
     @Body() createUserDto: CreateUserDto,
   ): Promise<SignUpDto | undefined> {
     const user = await this.userService.findByEmail(createUserDto.email);
+    console.log(user);
     if (user) {
       throw new ConflictException('This email is already being used.');
     }

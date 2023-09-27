@@ -5,29 +5,19 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
+import { User, UserDocument } from 'src/entities/user.entity';
+import { UsersService } from 'src/users/users.service';
 import { ObjectId } from 'typeorm';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private userService: UsersService,
   ) {}
 
-  async signIn(signInDto: ISignInInterface): Promise<any> {
-    const user = await this.usersService
-      .findByEmail(signInDto.email)
-      .catch(() => undefined);
-    if (!signInDto.password) {
-      throw new BadRequestException('Something bad happened', {
-        cause: new Error(),
-        description: 'Password is required',
-      });
-    }
-    if (!user) throw new BadRequestException('User does not exist');
-
+  async signIn(signInDto: ISignInInterface, user: UserDocument): Promise<any> {
     const isMatch = bcrypt.compare(signInDto.password, user.password);
 
     if (!isMatch) {
@@ -74,10 +64,10 @@ export class AuthService {
     };
   }
 
-  async updateRefreshToken(userId: ObjectId, refreshToken: string) {
+  async updateRefreshToken(userId: string, refreshToken: string) {
     const saltOrRounds = Number(process.env.HASH_ROUNDS);
     const hashedRefreshToken = await bcrypt.hash(refreshToken, saltOrRounds);
-    await this.usersService.update(userId, {
+    return await this.userService.updateById(userId, {
       refreshToken: hashedRefreshToken,
     });
   }
