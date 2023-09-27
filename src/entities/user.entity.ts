@@ -1,4 +1,3 @@
-import { Column, Entity, ObjectId, ObjectIdColumn, OneToOne } from 'typeorm';
 import { Photo } from './photo.entity';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';

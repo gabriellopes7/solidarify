@@ -1,11 +1,4 @@
-import {
-  Body,
-  ConflictException,
-  Controller,
-  Post,
-  Get,
-  Param,
-} from '@nestjs/common';
+import { Body, ConflictException, Controller, Post, Get } from '@nestjs/common';
 import { CreateUserDto } from './dtos/user.dto';
 import { User } from 'src/entities/user.entity';
 import { UsersService } from './users.service';
