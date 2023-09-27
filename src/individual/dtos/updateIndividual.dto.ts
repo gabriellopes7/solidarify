@@ -2,21 +2,17 @@ import {
   IsBoolean,
   IsDateString,
   IsInt,
-  IsNotEmpty,
   IsOptional,
   MinLength,
 } from 'class-validator';
 
-export class CreateIndividualDto {
-  @IsNotEmpty()
+export class UpdateIndividualDto {
   @MinLength(3)
   firstName: string;
 
-  @IsNotEmpty()
   @MinLength(3)
   lastName: string;
 
-  @IsNotEmpty()
   @IsDateString()
   birthDate: Date;
 
@@ -28,8 +24,6 @@ export class CreateIndividualDto {
   @IsBoolean()
   @IsOptional()
   isPrivate?: boolean;
-
-  user: string;
 
   @IsOptional()
   about?: string;

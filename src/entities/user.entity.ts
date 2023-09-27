@@ -18,8 +18,8 @@ export class User {
 
   // // @OneToOne(() => Photo)
   // photo?: Photo;
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Individual' })
-  Individual: Individual;
+  // @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Individual' })
+  // individual: Individual;
 
   @Prop(String)
   refreshToken?: string;

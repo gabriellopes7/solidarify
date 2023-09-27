@@ -1,26 +1,35 @@
 import { UserType } from './userType.enum';
 import { User } from './user.entity';
-import { Schema } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
+
+export type IndividualDocument = HydratedDocument<Individual>;
 
 @Schema()
 export class Individual {
-  // @ObjectIdColumn()
-  // id: ObjectId;
-  // @Column()
-  // firstName: string;
-  // @Column()
-  // lastName: string;
-  // @Column()
-  // birthDate: Date;
-  // @Column('int')
+  @Prop({ type: String, required: true })
+  firstName: string;
+  @Prop({ type: String, required: true })
+  lastName: string;
+  @Prop({ type: Date, required: true })
+  birthDate: Date;
+
+  // @Prop({ type: Number, required: true })
   // userType: UserType = 2;
-  // @Column()
-  // contact?: number;
-  // @Column()
-  // isPrivate: boolean;
-  // @OneToOne(() => User)
+
+  @Prop(Number)
+  contact?: number;
+
+  @Prop({ type: Boolean, required: true })
+  isPrivate: boolean;
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+  user: User;
+  // @Prop()
   // user: User;
   //TODO
-  //   @OneToMany(() => Donation)
-  //   donations: Donation[];
+  // @OneToMany(() => Donation)
+  // donations: Donation[];
 }
+
+export const IndividualSchema = SchemaFactory.createForClass(Individual);

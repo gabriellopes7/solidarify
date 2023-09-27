@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -8,7 +9,6 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { User, UserDocument } from 'src/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
-import { ObjectId } from 'typeorm';
 
 @Injectable()
 export class AuthService {
@@ -35,7 +35,7 @@ export class AuthService {
     return tokens;
   }
 
-  async getTokens(id: ObjectId, email: string) {
+  async getTokens(id: string, email: string) {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
         {
@@ -70,5 +70,25 @@ export class AuthService {
     return await this.userService.updateById(userId, {
       refreshToken: hashedRefreshToken,
     });
+  }
+
+  async logout(userId: string) {
+    return await this.userService.updateById(userId, {
+      refreshToken: null,
+    });
+  }
+
+  async refreshTokens(userId: string, refreshToken: string) {
+    const user = await this.userService.findById(userId);
+    if (!user || !user.refreshToken)
+      throw new ForbiddenException('Access Denied');
+    const refreshTokenMatches = await bcrypt.compare(
+      refreshToken,
+      user.refreshToken,
+    );
+    if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
+    const tokens = await this.getTokens(user.id, user.email);
+    await this.updateRefreshToken(user.id, tokens.refreshToken);
+    return tokens;
   }
 }

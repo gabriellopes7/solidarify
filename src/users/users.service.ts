@@ -5,14 +5,13 @@ import { User, UserDocument } from 'src/entities/user.entity';
 import { CreateUserDto } from './dtos/user.dto';
 import { IUpdateUser } from './interfaces/updateUser.interface';
 import * as bcrypt from 'bcrypt';
+import { ICreateUser } from './interfaces/createUser.interface';
 
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
-  async create(
-    createUserDto: CreateUserDto,
-  ): Promise<UserDocument | undefined> {
+  async create(createUserDto: ICreateUser): Promise<UserDocument | undefined> {
     const saltOrRounds = Number(process.env.HASH_ROUNDS);
     const hashPassword = await bcrypt.hash(
       createUserDto.password,
