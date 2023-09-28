@@ -26,7 +26,7 @@ export class IndividualService {
   }
 
   async delete(id: string) {
-    return await this.individualModel.findOneAndDelete({ id });
+    return await this.individualModel.deleteOne({ _id: id });
   }
 
   async findById(id: string) {
