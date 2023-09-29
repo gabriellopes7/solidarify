@@ -8,13 +8,16 @@ import {
 
 export class UpdateIndividualDto {
   @MinLength(3)
-  firstName: string;
+  @IsOptional()
+  firstName?: string;
 
   @MinLength(3)
-  lastName: string;
+  @IsOptional()
+  lastName?: string;
 
   @IsDateString()
-  birthDate: Date;
+  @IsOptional()
+  birthDate?: Date;
 
   @IsInt()
   @IsOptional()
@@ -27,4 +30,6 @@ export class UpdateIndividualDto {
 
   @IsOptional()
   about?: string;
+
+  updateDate: Date;
 }

@@ -5,6 +5,8 @@ export interface ICreateIndividual {
 
   birthDate: Date;
 
+  document: string;
+
   contact?: number;
 
   isPrivate?: boolean;
@@ -12,4 +14,6 @@ export interface ICreateIndividual {
   user: string;
 
   about?: string;
+
+  createDate: Date;
 }

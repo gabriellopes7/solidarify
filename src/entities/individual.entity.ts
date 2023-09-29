@@ -1,4 +1,3 @@
-import { UserType } from './userType.enum';
 import { User } from './user.entity';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
@@ -14,9 +13,11 @@ export class Individual {
   @Prop({ type: Date, required: true })
   birthDate: Date;
 
+  @Prop({ type: String, required: true, length: 11 })
+  document: string;
+
   // @Prop({ type: Number, required: true })
   // userType: UserType = 2;
-
   @Prop(Number)
   contact?: number;
 
@@ -25,6 +26,12 @@ export class Individual {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   user: User;
+
+  @Prop({ type: Date, default: null })
+  createDate: Date;
+
+  @Prop({ type: Date, required: false, default: null })
+  updateDate: Date;
   // @Prop()
   // user: User;
   //TODO

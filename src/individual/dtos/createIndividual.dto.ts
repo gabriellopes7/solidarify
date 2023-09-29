@@ -4,6 +4,7 @@ import {
   IsInt,
   IsNotEmpty,
   IsOptional,
+  Length,
   MinLength,
 } from 'class-validator';
 
@@ -20,6 +21,10 @@ export class CreateIndividualDto {
   @IsDateString()
   birthDate: Date;
 
+  @IsNotEmpty()
+  @Length(11, 11, { message: 'CPF deve ter 11 dígitos' })
+  document: string;
+
   @IsInt()
   @IsOptional()
   contact?: number;
@@ -33,4 +38,6 @@ export class CreateIndividualDto {
 
   @IsOptional()
   about?: string;
+
+  createDate: Date;
 }

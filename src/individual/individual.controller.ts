@@ -19,6 +19,7 @@ import { IndividualDocument } from 'src/entities/individual.entity';
 import { Request } from 'express';
 import { UsersService } from 'src/users/users.service';
 import { UpdateIndividualDto } from './dtos/updateIndividual.dto';
+import { now } from 'mongoose';
 
 @Controller('individual')
 export class IndividualController {
@@ -57,6 +58,7 @@ export class IndividualController {
     }
     createIndividualDto.user = req.user['sub'];
     createIndividualDto.isPrivate = true;
+    createIndividualDto.createDate = now();
     return await this.individualService.create(createIndividualDto);
   }
 
@@ -66,20 +68,33 @@ export class IndividualController {
     @Body() updateIndividualDto: UpdateIndividualDto,
     @Req() req: Request,
   ) {
-    const individual = this.individualService.findByUserId(req.user['sub']);
+    const individual = await this.individualService.findByUserId(
+      req.user['sub'],
+    );
     if (!individual) {
       throw new BadRequestException('Profile not found');
     }
-    return await this.individualService.update(updateIndividualDto);
+    updateIndividualDto.updateDate = now();
+    return await this.individualService.update(
+      individual.id,
+      updateIndividualDto,
+    );
   }
 
   @UseGuards(AccessTokenGuard)
   @Delete(':id')
-  async delete(@Param('id') id: string) {
-    const individual = this.individualService.findById(id);
+  async delete(@Param('id') id: string, @Req() req: Request) {
+    const individual = await this.individualService.findById(id);
     if (!individual) {
       throw new BadRequestException('Profile not found');
     }
+    const individual_match = await this.individualService.findByUserId(
+      req.user['sub'],
+    );
+    if (!individual_match)
+      throw new BadRequestException('Not profile found for that user');
+    if (individual_match.id !== individual.id)
+      throw new BadRequestException('A problem has ocurred during delete');
     try {
       await this.individualService.delete(id);
       return individual;
